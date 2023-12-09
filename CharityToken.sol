@@ -37,7 +37,7 @@ contract OrderManagement is Ownable {
     struct Order {
         bytes32 id;
         address recipient;
-        string giftDescription;
+        uint giftId;
     }
 
     Order[] private orders;
@@ -49,10 +49,10 @@ contract OrderManagement is Ownable {
     /**
     * @dev Internal function for adding order to the orders array.
     * @param recipient Address of the recipient of the gift.
-    * @param giftDescription Description of the ordered gift.
+    * @param giftId Id of the ordered gift.
     **/
-    function addOrder(address recipient, string memory giftDescription) internal onlyOwner  {
-        orders.push(Order(keccak256(abi.encode(block.timestamp)), recipient, giftDescription));
+    function addOrder(address recipient, uint giftId) internal onlyOwner  {
+        orders.push(Order(keccak256(abi.encode(block.timestamp)), recipient, giftId));
     }
 
     /**
@@ -71,13 +71,13 @@ contract OrderManagement is Ownable {
     /**
     * @dev Find order id by the recipient address and the gift description.
     * @param recipient Address of the recipient of the gift.
-    * @param giftDescription Description of the ordered gift.
+    * @param giftId Id of the ordered gift.
     * @return orderId The id of the order.
     **/
-    function findOrderId(address recipient, string memory giftDescription) public view onlyOwner returns (bytes32 orderId) {
+    function findOrderId(address recipient, uint giftId) public view onlyOwner returns (bytes32 orderId) {
         for (uint i = 0 ; i < orders.length; i++) {
-            if (keccak256(abi.encodePacked(orders[i].recipient, orders[i].giftDescription)) == 
-                keccak256(abi.encodePacked(recipient, giftDescription))) {
+            if (keccak256(abi.encodePacked(orders[i].recipient, orders[i].giftId)) == 
+                keccak256(abi.encodePacked(recipient, giftId))) {
                 return orders[i].id;
             }
         }
@@ -166,7 +166,7 @@ contract CharityToken is OrderManagement {
         require(bytes(gifts[giftId].description).length > 0, "The gift with this id does not exist");
 
         balances[msg.sender] -= gifts[giftId].price;
-        addOrder(msg.sender, gifts[giftId].description);
+        addOrder(msg.sender, giftId);
         emit TokensRedeem(gifts[giftId].price, gifts[giftId].description);
     }
 
